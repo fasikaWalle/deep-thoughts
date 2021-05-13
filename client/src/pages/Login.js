@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import { useMutation } from "@apollo/react-hooks";
+import React, { useState } from "react";
+import { LOGIN_USER } from "../utils/mutiations";
+import Auth from "../utils/Auth";
 
 const Login = (props) => {
-  const [formState, setFormState] = useState({ email: '', password: '' });
+  const [formState, setFormState] = useState({ email: "", password: "" });
+  const [login, { error }] = useMutation(LOGIN_USER);
 
   // update state based on form input changes
   const handleChange = (event) => {
     const { name, value } = event.target;
-
     setFormState({
       ...formState,
       [name]: value,
@@ -16,43 +19,52 @@ const Login = (props) => {
   // submit form
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-
+    try {
+      const { data } = await login({
+        variables: { ...formState },
+      });
+      Auth.login(data.login.token);
+      console.log(data);
+    } catch (e) {
+      console.log(e);
+    }
     // clear form values
     setFormState({
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     });
   };
 
   return (
-    <main className='flex-row justify-center mb-4'>
-      <div className='col-12 col-md-6'>
-        <div className='card'>
-          <h4 className='card-header'>Login</h4>
-          <div className='card-body'>
+    <main className="flex-row justify-center mb-4">
+      <div className="col-12 col-md-6">
+        <div className="card">
+          <h4 className="card-header">Login</h4>
+          <div className="card-body">
             <form onSubmit={handleFormSubmit}>
               <input
-                className='form-input'
-                placeholder='Your email'
-                name='email'
-                type='email'
-                id='email'
+                className="form-input"
+                placeholder="Your email"
+                name="email"
+                type="email"
+                id="email"
                 value={formState.email}
                 onChange={handleChange}
               />
               <input
-                className='form-input'
-                placeholder='******'
-                name='password'
-                type='password'
-                id='password'
+                className="form-input"
+                placeholder="******"
+                name="password"
+                type="password"
+                id="password"
                 value={formState.password}
                 onChange={handleChange}
               />
-              <button className='btn d-block w-100' type='submit'>
+              <button className="btn d-block w-100" type="submit">
                 Submit
               </button>
             </form>
+            {error && <div>login failed!!</div>}
           </div>
         </div>
       </div>
